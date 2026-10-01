@@ -3,26 +3,26 @@ resource "aws_vpc" "terrefvpc" {
   instance_tenancy = "default"
 
   tags = {
-    Name = "srivpc"
+    Name = var.vpc_name
   }
 }
 
-resource "aws_subnet" "terrefsubnet" {
+resource "aws_subnet" "terrefpubsub" {
   vpc_id = aws_vpc.terrefvpc.id
   cidr_block = var.publicsunet_cidr_block
-  availability_zone = "us-east-1a"
+  availability_zone = var.availability_zone
   map_public_ip_on_launch = true
   tags = {
-      Name = "PublicSubnet"
+      Name = var.public_subnet_name
   } 
 }
 
 resource "aws_subnet" "terrefprisub" {
     vpc_id = aws_vpc.terrefvpc.id
     cidr_block = var.privatesubnet_cidr_block
-    availability_zone = "us-east-1a"
+    availability_zone = var.availability_zone
     tags = {
-      Name = "PrivateSubnet"
+      Name = var.private_subnet_name
     } 
 }
 
@@ -45,7 +45,7 @@ resource "aws_eip" "terrefeip" {
 
 resource "aws_nat_gateway" "terrefnatgw" {
   allocation_id = aws_eip.terrefeip.id
-  subnet_id     = aws_subnet.terrefpubsub1.id
+  subnet_id     = aws_subnet.terrefpubsub.id
   depends_on = [ aws_internet_gateway.terrefigw]
 
   tags = {
@@ -81,7 +81,7 @@ resource "aws_route_table" "terrefprirt" {
 }
 
 resource "aws_route_table_association" "terrefpubtrtassoc" {
-  subnet_id      = aws_subnet.terrefpubsub1.id
+  subnet_id      = aws_subnet.terrefpubsub.id
   route_table_id = aws_route_table.terrefpubrt.id
 }
 
